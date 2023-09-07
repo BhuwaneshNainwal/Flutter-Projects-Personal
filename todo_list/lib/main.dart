@@ -42,6 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var isEditEnabled = false;
   var currentEditTaskId = -1;
   var searchTask = "";
+  List<Task> filteredTasksList = [];
+
   @override
   void dispose() {
     _taskController.dispose();
@@ -122,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ? 0
                                   : tasksList[tasksList.length - 1].id + 1,
                               task: currentTask));
+                          filteredTasksList = tasksList;
                           _taskController.text = "";
                           currentTask = "";
                         });
@@ -156,6 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     if (tasksList.isNotEmpty) {
                       setState(() {
                         tasksList.clear();
+                        filteredTasksList.clear();
                         isEditEnabled = false;
                       });
 
@@ -204,10 +208,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   setState(() {
                     searchTask = value;
                     if (searchTask != "") {
-                      tasksList = tasksList
+                      filteredTasksList = filteredTasksList
                           .where((currentTask) =>
-                              currentTask.task.contains(searchTask))
+                              currentTask.task.startsWith(searchTask))
                           .toList();
+                    } else {
+                      filteredTasksList = tasksList;
                     }
                   });
                 },
@@ -231,13 +237,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     scrollDirection: Axis.vertical,
                     shrinkWrap:
                         true, // This property makes the ListView only take up the necessary height
-                    itemCount: tasksList.length,
+                    itemCount: filteredTasksList.length,
                     itemBuilder: (context, index) {
                       return Card(
                         margin: EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 16.0),
                         child: ListTile(
-                          title: Text(tasksList[index].task),
+                          title: Text(filteredTasksList[index].task),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -245,12 +251,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                 icon: const Icon(Icons.delete),
                                 onPressed: () {
                                   setState(() {
-                                    tasksList = tasksList
+                                    filteredTasksList = filteredTasksList
                                         .where((task) =>
-                                            task.id != tasksList[index].id)
+                                            task.id !=
+                                            filteredTasksList[index].id)
                                         .toList();
                                   });
-                                  if (tasksList.length == 0) {
+                                  if (filteredTasksList.length == 0) {
                                     setState(() {
                                       isEditEnabled = false;
                                     });
@@ -266,7 +273,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   if (isEditEnabled) {
                                     setState(() {
                                       _taskController.text =
-                                          tasksList[index].task;
+                                          filteredTasksList[index].task;
                                       currentEditTaskId = index;
                                     });
                                   } else {
