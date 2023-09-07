@@ -35,10 +35,13 @@ class Task {
 
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController _taskController = TextEditingController();
+  TextEditingController _searchController = TextEditingController();
+
   List<Task> tasksList = [];
   var currentTask = "";
   var isEditEnabled = false;
   var currentEditTaskId = -1;
+  var searchTask = "";
   @override
   void dispose() {
     _taskController.dispose();
@@ -175,6 +178,40 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ],
+            ),
+            SizedBox(
+              height: 10, // Adjust the height to your preference
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white, // Change the color to match your design
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              child: TextFormField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search a task...',
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchTask = value;
+                    if (searchTask != "") {
+                      tasksList = tasksList
+                          .where((currentTask) =>
+                              currentTask.task.contains(searchTask))
+                          .toList();
+                    }
+                  });
+                },
+              ),
             ),
             Expanded(
               child: Padding(
