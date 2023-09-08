@@ -208,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   setState(() {
                     searchTask = value;
                     if (searchTask != "") {
-                      filteredTasksList = filteredTasksList
+                      filteredTasksList = tasksList
                           .where((currentTask) =>
                               currentTask.task.startsWith(searchTask))
                           .toList();
