@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(MyApp());
@@ -44,9 +45,28 @@ class _MyHomePageState extends State<MyHomePage> {
   var searchTask = "";
   List<Task> filteredTasksList = [];
 
+  Timer? _debounce;
+
+  onSearchChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        searchTask = value;
+        if (searchTask != "") {
+          filteredTasksList = tasksList
+              .where((currentTask) => currentTask.task.startsWith(searchTask))
+              .toList();
+        } else {
+          filteredTasksList = tasksList;
+        }
+      });
+    });
+  }
+
   @override
   void dispose() {
     _taskController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -195,29 +215,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 borderRadius: BorderRadius.all(Radius.circular(4)),
               ),
               child: TextFormField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search a task...',
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search a task...',
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    searchTask = value;
-                    if (searchTask != "") {
-                      filteredTasksList = tasksList
-                          .where((currentTask) =>
-                              currentTask.task.startsWith(searchTask))
-                          .toList();
-                    } else {
-                      filteredTasksList = tasksList;
-                    }
-                  });
-                },
-              ),
+                  onChanged: onSearchChanged),
             ),
             Expanded(
               child: Padding(
